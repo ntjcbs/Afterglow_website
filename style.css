@@ -26,6 +26,7 @@ body {
 
 a { color: var(--link); text-decoration: none; }
 a:hover { text-decoration: underline; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--link); outline-offset: 4px; }
 
 img { max-width: 100%; height: auto; display: block; }
 
@@ -73,7 +74,7 @@ img { max-width: 100%; height: auto; display: block; }
 .page h1 { font-size: clamp(32px, 5vw, 44px); letter-spacing: -0.02em; line-height: 1.1; margin: 0 0 8px; }
 .page .lede { color: var(--muted); margin: 0 0 40px; }
 .page h2 { font-size: 21px; margin: 40px 0 8px; }
-.page p, .page li { color: #d9d5ea; }
+.page p, .page li { color: #d9d5ea; overflow-wrap: anywhere; }
 .page ul { padding-left: 22px; }
 .contact { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 24px; }
 .contact p { margin: 0; }

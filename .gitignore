@@ -1,0 +1,27 @@
+# Local system and editor files
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Credentials and local configuration (never needed by this static site)
+.env
+.env.*
+*.pem
+*.key
+*.p8
+*.p12
+*.pfx
+*.mobileprovision
+*.provisionprofile
+.aws/
+.ssh/
+
+# Local logs and exports
+*.log
+*.bak
+*.zip
+*.dmg
+*.ipa
+*.xcarchive/
