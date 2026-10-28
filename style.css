@@ -1,0 +1,89 @@
+/* Afterglow's website: dark like the app, with the logo's gradient as the accent. */
+:root {
+  --bg: #07060f;
+  --surface: #12101f;
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #f2f0fa;
+  --muted: #a9a4c2;
+  --link: #8fb3ff;
+  --logo: linear-gradient(90deg, #ff3373, #c245ff, #5c61ff, #38a3ff, #4df5d6);
+  --radius: 18px;
+  --width: 1080px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 17px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+img { max-width: 100%; height: auto; display: block; }
+
+.wrap { max-width: var(--width); margin: 0 auto; padding: 0 20px; }
+
+/* Header and footer */
+.top { border-bottom: 1px solid var(--border); }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--text); font-weight: 600; }
+.brand:hover { text-decoration: none; }
+.brand img { width: 32px; height: 32px; }
+.top nav { display: flex; gap: 22px; font-size: 15px; }
+.top nav a { color: var(--muted); }
+.top nav a:hover, .top nav a[aria-current="page"] { color: var(--text); text-decoration: none; }
+
+.bottom { border-top: 1px solid var(--border); margin-top: 96px; color: var(--muted); font-size: 14px; }
+.bottom .wrap { display: flex; flex-wrap: wrap; gap: 8px 22px; justify-content: space-between; padding-top: 28px; padding-bottom: 40px; }
+.bottom nav { display: flex; gap: 22px; }
+.bottom a { color: var(--muted); }
+
+/* Home */
+.hero { text-align: center; padding: 72px 0 40px; }
+.hero .icon { width: 128px; height: 128px; margin: 0 auto 20px; }
+.hero h1 { font-size: clamp(40px, 7vw, 64px); line-height: 1.05; letter-spacing: -0.02em; margin: 0; }
+.gradient { background: var(--logo); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero .kind { color: var(--muted); font-size: 20px; margin: 10px 0 0; }
+.hero .pitch { font-size: clamp(19px, 2.4vw, 23px); max-width: 680px; margin: 26px auto 0; }
+.store { display: inline-block; margin-top: 30px; padding: 12px 26px; border-radius: 999px; background: var(--text); color: var(--bg); font-weight: 600; }
+.store:hover { text-decoration: none; opacity: 0.9; }
+.store.soon { background: var(--surface); color: var(--muted); border: 1px solid var(--border); cursor: default; }
+.requires { color: var(--muted); font-size: 14px; margin-top: 14px; }
+
+.shot { border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 30px 80px rgba(92, 97, 255, 0.18); }
+.hero-shot { margin-top: 48px; }
+
+.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-top: 88px; }
+.feature { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 24px 20px; }
+.feature h2 { font-size: 19px; margin: 0 0 8px; }
+.feature p { color: var(--muted); margin: 0; font-size: 16px; }
+
+.gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 18px; margin-top: 88px; }
+
+/* Text pages: support and privacy */
+.page { max-width: 720px; margin: 0 auto; padding: 56px 20px 0; }
+.page h1 { font-size: clamp(32px, 5vw, 44px); letter-spacing: -0.02em; line-height: 1.1; margin: 0 0 8px; }
+.page .lede { color: var(--muted); margin: 0 0 40px; }
+.page h2 { font-size: 21px; margin: 40px 0 8px; }
+.page p, .page li { color: #d9d5ea; }
+.page ul { padding-left: 22px; }
+.contact { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 24px; }
+.contact p { margin: 0; }
+.contact p + p { margin-top: 6px; }
+details { border-bottom: 1px solid var(--border); padding: 16px 0; }
+summary { cursor: pointer; font-weight: 600; color: var(--text); }
+details p { margin: 10px 0 0; }
+
+@media (max-width: 520px) {
+  .gallery { grid-template-columns: 1fr; }
+  .top nav { gap: 16px; }
+  .hero { padding-top: 48px; }
+}
