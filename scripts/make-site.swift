@@ -3,12 +3,17 @@
 //   privacy.html   from PRIVACY.md, the same text the app shows in About Afterglow
 //   images/icon-*  the app icon as macOS draws it, from Support/AppIcon.icon
 //   images/*.jpg   web-sized copies of the store screenshots in dist/AppStoreMedia
+//   video/         the store previews, repackaged for the web, with their poster frames
 //
 // index.html, support.html and style.css are written by hand. Run from this
 // repository's root after changing the policy, the icon or the screenshots:
 //   swift scripts/make-site.swift [path to the Afterglow repository]
 // The app's repository defaults to ../Afterglow, beside this one.
 import AppKit
+import AVFoundation
+
+/// Where in each preview the frame shown before it plays comes from (8 s if not listed).
+let posterSeconds: [String: Double] = ["fire-drop": 8, "calm-tide": 8]
 
 let site = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
 let root = CommandLine.arguments.count > 1 ? URL(fileURLWithPath: CommandLine.arguments[1])
@@ -127,13 +132,15 @@ print("Wrote images/icon-64.png, icon-180.png and icon-512.png")
 
 // MARK: Screenshots
 
-// Store name (without its number) → name on the site. The hero is the one
-// that shows the app's own controls.
-let screenshots = ["2-watch-it-glow": "hero", "5-play-anything": "play-anything", "3-big-screen": "big-screen",
-                   "4-move-to-the-groove": "move-to-the-groove", "8-forty-thousand-looks": "forty-thousand-looks"]
-let media = root.appendingPathComponent("dist/AppStoreMedia/screenshots")
+// Every store screenshot, without its number. The one that shows the app's
+// own controls is the hero.
+let screenshots = ["1-kick-back": "kick-back", "2-watch-it-glow": "hero", "3-big-screen": "big-screen",
+                   "4-move-to-the-groove": "move-to-the-groove", "5-play-anything": "play-anything",
+                   "6-just-watch": "just-watch", "7-paint-the-room": "paint-the-room",
+                   "8-forty-thousand-looks": "forty-thousand-looks", "9-come-alive": "come-alive", "10-glow": "glow"]
+let media = root.appendingPathComponent("dist/AppStoreMedia")
 for (source, name) in screenshots.sorted(by: { $0.key < $1.key }) {
-    let input = media.appendingPathComponent("\(source).png")
+    let input = media.appendingPathComponent("screenshots/\(source).png")
     guard FileManager.default.fileExists(atPath: input.path) else {
         print("Missing \(input.path): run zsh Scripts/make-store-media.sh in the app's repository first. Kept the existing images/\(name).jpg.")
         continue
@@ -147,6 +154,57 @@ for (source, name) in screenshots.sorted(by: { $0.key < $1.key }) {
     sips.waitUntilExit()
 }
 print("Wrote images/" + screenshots.values.sorted().map { "\($0).jpg" }.joined(separator: ", "))
+
+// MARK: Preview videos
+
+// The store previews, repackaged for the web without re-encoding: each an MP4
+// with its index at the front, so it starts before it has fully downloaded,
+// and a poster frame. Lower bit rates (6 Mbit/s in H.264 or HEVC) visibly
+// softened the bright line and the fine trails, so they keep the store
+// encoding. The page loads one only when someone presses play.
+let previews = media.appendingPathComponent("previews")
+let video = site.appendingPathComponent("video")
+try FileManager.default.createDirectory(at: video, withIntermediateDirectories: true)
+// The store's upload order, from upload_previews in the app's Scripts/make-store-media.sh.
+let available = ((try? FileManager.default.contentsOfDirectory(atPath: previews.path)) ?? [])
+    .filter { $0.hasSuffix(".mov") }.map { String($0.dropLast(4)) }
+let storeScript = (try? String(contentsOf: root.appendingPathComponent("Scripts/make-store-media.sh"), encoding: .utf8)) ?? ""
+let uploadOrder = storeScript.range(of: #"upload_previews=\(([^)]*)\)"#, options: .regularExpression)
+    .map { storeScript[$0].dropFirst("upload_previews=(".count).dropLast().split(separator: " ").map(String.init) } ?? []
+let names = uploadOrder.filter(available.contains) + available.filter { !uploadOrder.contains($0) }.sorted()
+if names.isEmpty {
+    print("No previews in \(previews.path): run zsh Scripts/make-store-media.sh in the app's repository first. Kept the existing videos.")
+} else {
+    for name in names {
+        let asset = AVURLAsset(url: previews.appendingPathComponent("\(name).mov"))
+        let movie = video.appendingPathComponent("\(name).mp4")
+        try? FileManager.default.removeItem(at: movie)
+        guard let export = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetPassthrough) else {
+            fatalError("Could not repackage \(name).mov.")
+        }
+        export.shouldOptimizeForNetworkUse = true
+        try await export.export(to: movie, as: .mp4)
+
+        // The frame shown before it plays.
+        let frames = AVAssetImageGenerator(asset: asset)
+        frames.appliesPreferredTrackTransform = true
+        frames.maximumSize = CGSize(width: 1600, height: 900)
+        frames.requestedTimeToleranceBefore = .zero
+        frames.requestedTimeToleranceAfter = .zero
+        let (poster, _) = try await frames.image(at: CMTime(seconds: posterSeconds[name] ?? 8, preferredTimescale: 600))
+        try NSBitmapImageRep(cgImage: poster).representation(using: .jpeg, properties: [.compressionFactor: 0.82])!
+            .write(to: video.appendingPathComponent("\(name).jpg"))
+        let megabytes = Double((try? FileManager.default.attributesOfItem(atPath: movie.path)[.size] as? Int) ?? 0) / 1_000_000
+        print(String(format: "Wrote video/%@.mp4 (%.1f MB) and video/%@.jpg", name, megabytes, name))
+    }
+    // Anything else is a preview no longer in the upload set, or a temporary copy left by the export.
+    let kept = Set(names.flatMap { ["\($0).mp4", "\($0).jpg"] })
+    for leftover in try FileManager.default.contentsOfDirectory(atPath: video.path) where !kept.contains(leftover) {
+        try FileManager.default.removeItem(at: video.appendingPathComponent(leftover))
+        print("Removed video/\(leftover)")
+    }
+    print("Videos in upload order: " + names.joined(separator: ", ") + ". index.html lists them in its See it move section.")
+}
 
 // GitHub Pages: serve the files as they are, at the site's own domain.
 try Data().write(to: site.appendingPathComponent(".nojekyll"))
