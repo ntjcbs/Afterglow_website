@@ -54,9 +54,8 @@ img { max-width: 100%; height: auto; display: block; }
 .gradient { background: var(--logo); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .hero .kind { color: var(--muted); font-size: 20px; margin: 10px 0 0; }
 .hero .pitch { font-size: clamp(19px, 2.4vw, 23px); max-width: 680px; margin: 26px auto 0; }
-.store { display: inline-block; margin-top: 30px; padding: 12px 26px; border-radius: 999px; background: var(--text); color: var(--bg); font-weight: 600; }
-.store:hover { text-decoration: none; opacity: 0.9; }
-.store.soon { background: var(--surface); color: var(--muted); border: 1px solid var(--border); cursor: default; }
+.store-badge { display: inline-block; margin-top: 30px; }
+.store-badge img { height: 54px; width: auto; }
 .requires { color: var(--muted); font-size: 14px; margin-top: 14px; }
 
 .shot { border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 30px 80px rgba(92, 97, 255, 0.18); }
